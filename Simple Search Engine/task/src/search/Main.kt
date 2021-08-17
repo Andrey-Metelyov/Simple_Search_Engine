@@ -3,6 +3,7 @@ package search
 import java.io.File
 
 val db = mutableListOf<String>()
+val index = mutableMapOf<String, MutableList<Int>>()
 
 fun main(args: Array<String>) {
     fillDb(args)
@@ -36,13 +37,12 @@ fun printAll() {
 fun findPerson() {
     println("Enter a name or email to search all suitable people.")
     val input = readLine()!!
-    val found = db.filter { it.lowercase().contains(input.lowercase()) }
-    if (found.isEmpty()) {
+    val found = index[input]
+    if (found == null || found.isEmpty()) {
         println("No matching people found.")
     } else {
-//        println("People found:")
-        for (el in found) {
-            println(el)
+        for (el in found!!) {
+            println(db[el])
         }
     }
 }
@@ -73,7 +73,15 @@ private fun fillDb(args: Array<String>) {
 //        db.add(readLine()!!)
 //    }
     val file = File(args[1])
-    for (line in file.readLines()) {
+    for ((n, line) in file.readLines().withIndex()) {
         db.add(line)
+        val words = line.split(" ")
+        for (word in words) {
+            if (index.containsKey(word)) {
+                index[word]!!.add(n)
+            } else {
+                index[word] = mutableListOf(n)
+            }
+        }
     }
 }
