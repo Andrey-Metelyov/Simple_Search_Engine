@@ -7,7 +7,8 @@ val index = mutableMapOf<String, MutableList<Int>>()
 
 fun main(args: Array<String>) {
     fillDb(args)
-
+    System.err.println(db)
+    System.err.println(index)
     while (true) {
         when (menu()) {
             1 -> findPerson()
@@ -35,13 +36,53 @@ fun printAll() {
 }
 
 fun findPerson() {
+    println("Select a matching strategy: ALL, ANY, NONE")
+    val strategy = readLine()!!
     println("Enter a name or email to search all suitable people.")
-    val input = readLine()!!
-    val found = index[input]
-    if (found == null || found.isEmpty()) {
-        println("No matching people found.")
+    val input = readLine()!!.lowercase().split(" ")
+    var found = when (strategy) {
+        "ANY" -> {
+            val set = mutableSetOf<Int>()
+            for (el in input) {
+                val res = index[el]
+                if (res != null && res.isNotEmpty()) {
+                    set.addAll(res)
+                }
+            }
+            set
+        }
+        "ALL" -> {
+            var andSet = mutableSetOf<Int>()
+            for (i in 0 until db.size) andSet.add(i)
+            for (el in input) {
+                val res = index[el]
+                if (res != null && res.isNotEmpty()) {
+                    andSet = andSet.intersect(res) as MutableSet<Int>
+                }
+            }
+            andSet
+        }
+        "NONE" -> {
+            val noneSet = mutableSetOf<Int>()
+            val allSet = mutableSetOf<Int>()
+            for (i in 0 until db.size) allSet.add(i)
+//            System.err.println(allSet)
+            for (el in input) {
+                val res = index[el]
+                if (res != null && res.isNotEmpty()) {
+                    System.err.println("$el found in $res")
+                    noneSet.addAll(res)
+                }
+            }
+            allSet.subtract(noneSet)
+        }
+        else -> emptySet<Int>()
+    }
+    if (found.isEmpty()) {
+        println("Nothing found")
     } else {
-        for (el in found!!) {
+        println("${found.size} persons found:")
+        for (el in found) {
             println(db[el])
         }
     }
@@ -75,7 +116,7 @@ private fun fillDb(args: Array<String>) {
     val file = File(args[1])
     for ((n, line) in file.readLines().withIndex()) {
         db.add(line)
-        val words = line.split(" ")
+        val words = line.lowercase().split(" ")
         for (word in words) {
             if (index.containsKey(word)) {
                 index[word]!!.add(n)
