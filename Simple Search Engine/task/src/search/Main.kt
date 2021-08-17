@@ -1,9 +1,11 @@
 package search
 
+import java.io.File
+
 val db = mutableListOf<String>()
 
-fun main() {
-    fillDb()
+fun main(args: Array<String>) {
+    fillDb(args)
 
     while (true) {
         when (menu()) {
@@ -63,10 +65,15 @@ private fun menu(): Int {
     }
 }
 
-private fun fillDb() {
-    println("Enter the number of people:")
-    val number = readLine()!!.toInt()
-    repeat(number) {
-        db.add(readLine()!!)
+private fun fillDb(args: Array<String>) {
+//    println("Enter the number of people:")
+//    val number = readLine()!!.toInt()
+
+//    repeat(number) {
+//        db.add(readLine()!!)
+//    }
+    val file = File(args[1])
+    for (line in file.readLines()) {
+        db.add(line)
     }
 }
